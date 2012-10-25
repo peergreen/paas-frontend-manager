@@ -211,80 +211,96 @@ public class FrontendManagerBean implements org.ow2.jonas.jpaas.frontend.manager
 
             vhostID = String.valueOf(vhost.getId());
         }
-        virtualHost = new VirtualHostVO(vhostName, vhostID);
-        paasFrontend.getVirtualHosts().add(virtualHost);
-        paasFrontend = srPaasFrontendFacade.updateFrontend(paasFrontend);
 
-/*        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-        params.add("address", "*:80");
-        params.add("servername", vhostName);
-
-        Vhost vhost = sendRequestWithReply(
-                REST_TYPE.POST,
-                getUrl(apiUrl, "/vhostmanager/vhost"),
-                params,
-                Vhost.class);
-
-        VirtualHostVO virtualHostVO = new VirtualHostVO(vhostName, String.valueOf(vhost.getId()));
-
-
-        paasFrontend.getVirtualHosts().add(virtualHostVO);
-        paasFrontend = srPaasFrontendFacade.updateFrontend(paasFrontend);*/
-
-
-        for (String routerName : targetRouterNameList) {
-            // get the router from SR
-            ApacheJkVO apacheJk = null;
-            List<ApacheJkVO> apacheJkVOList = srApacheJkEjb.findApacheJkRouters();
-            for (ApacheJkVO tmp : apacheJkVOList) {
-                if (tmp.getName().equals(routerName)) {
-                    apacheJk = tmp;
-                    break;
-                }
+        //Do nothing if there is already a vhost with the same name
+        boolean vhostExists = false;
+        for (VirtualHostVO vhostTmp : virtualHostVOList) {
+            if (vhostTmp.getName().equals(vhostName)) {
+                vhostExists = true;
+                break;
             }
-            if (apacheJk == null) {
-                throw new FrontendManagerBeanException("Router '" + routerName + "' doesn't exist !");
-            }
-
-            IaasComputeVO iaasCompute = srPaasResourceIaasComputeLink.findIaasComputeByPaasResource(apacheJk.getId());
-            if (iaasCompute == null) {
-                throw new FrontendManagerBeanException("Cannot find the IaaS Compute for the Router '" + routerName + "!");
-            }
-
-            String proxyUrl = "http://" + iaasCompute.getIpAddress() + "/";
-            MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-            params.add("path", "/" + vhostName + "/"); // Temporary. ToDo : use "/" instead of /vhostname.
-            params.add("url", proxyUrl);
-
-            Directive proxyDirective = sendRequestWithReply(
-                    REST_TYPE.POST,
-                    getUrl(apiUrl, "/proxymanager/vhost/" + vhostID + "/proxypass"),
-                    params,
-                    Directive.class);
-
-
-            Map<String,String> proxyList = new Hashtable<String, String>();
-            proxyList.put(String.valueOf(proxyDirective.getId()), proxyDirective.getValue());
-            logger.debug("proxyList : " + proxyList.size());
-
-
-            virtualHostVOList = paasFrontend.getVirtualHosts();
-            for (VirtualHostVO tmp : virtualHostVOList) {
-                if (tmp.getName().equals(vhostName)) {
-                    tmp.setProxypassDirectives(proxyList);
-                    break;
-                }
-            }
-
         }
+        if (!vhostExists) {
+            virtualHost = new VirtualHostVO(vhostName, vhostID);
+            paasFrontend.getVirtualHosts().add(virtualHost);
+            paasFrontend = srPaasFrontendFacade.updateFrontend(paasFrontend);
 
-        paasFrontend = srPaasFrontendFacade.updateFrontend(paasFrontend);
-        // Ask for a reload
-        sendRequestWithReply(
-                REST_TYPE.POST,
-                getUrl(apiUrl, "apache-manager/server/action/reload"),
-                null,
-                null);
+            /*        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+          params.add("address", "*:80");
+          params.add("servername", vhostName);
+
+          Vhost vhost = sendRequestWithReply(
+                  REST_TYPE.POST,
+                  getUrl(apiUrl, "/vhostmanager/vhost"),
+                  params,
+                  Vhost.class);
+
+          VirtualHostVO virtualHostVO = new VirtualHostVO(vhostName, String.valueOf(vhost.getId()));
+
+
+          paasFrontend.getVirtualHosts().add(virtualHostVO);
+          paasFrontend = srPaasFrontendFacade.updateFrontend(paasFrontend);*/
+
+
+            for (String routerName : targetRouterNameList) {
+                // get the router from SR
+                ApacheJkVO apacheJk = null;
+                List<ApacheJkVO> apacheJkVOList = srApacheJkEjb.findApacheJkRouters();
+                for (ApacheJkVO tmp : apacheJkVOList) {
+                    if (tmp.getName().equals(routerName)) {
+                        apacheJk = tmp;
+                        break;
+                    }
+                }
+                if (apacheJk == null) {
+                    throw new FrontendManagerBeanException("Router '" + routerName + "' doesn't exist !");
+                }
+
+                IaasComputeVO iaasCompute = srPaasResourceIaasComputeLink.findIaasComputeByPaasResource(apacheJk.getId());
+                if (iaasCompute == null) {
+                    throw new FrontendManagerBeanException("Cannot find the IaaS Compute for the Router '" + routerName + "!");
+                }
+
+                String[] splitName = vhostName.split(".jpaas.org");
+                if (splitName.length == 0) {
+                    throw new FrontendManagerBeanException("Error : cannot get the instance Name.");
+                }
+                String instanceName = splitName[0];
+                String proxyUrl = "http://" + iaasCompute.getIpAddress() + "/";
+                MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+                params.add("path", "/" + instanceName + "/"); // Temporary. ToDo : use "/" instead of /instanceName.
+                params.add("url", proxyUrl + instanceName + "/");
+
+                Directive proxyDirective = sendRequestWithReply(
+                        REST_TYPE.POST,
+                        getUrl(apiUrl, "/proxymanager/vhost/" + vhostID + "/proxypass"),
+                        params,
+                        Directive.class);
+
+
+                Map<String,String> proxyList = new Hashtable<String, String>();
+                proxyList.put(String.valueOf(proxyDirective.getId()), proxyDirective.getValue());
+                logger.debug("proxyList : " + proxyList.size());
+
+
+                virtualHostVOList = paasFrontend.getVirtualHosts();
+                for (VirtualHostVO tmp : virtualHostVOList) {
+                    if (tmp.getName().equals(vhostName)) {
+                        tmp.setProxypassDirectives(proxyList);
+                        break;
+                    }
+                }
+
+            }
+
+            paasFrontend = srPaasFrontendFacade.updateFrontend(paasFrontend);
+            // Ask for a reload
+            sendRequestWithReply(
+                    REST_TYPE.POST,
+                    getUrl(apiUrl, "apache-manager/server/action/reload"),
+                    null,
+                    null);
+        }
 
     }
 
