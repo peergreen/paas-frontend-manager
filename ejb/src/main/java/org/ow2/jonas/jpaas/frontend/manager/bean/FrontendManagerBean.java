@@ -269,7 +269,7 @@ public class FrontendManagerBean implements org.ow2.jonas.jpaas.frontend.manager
                 String proxyUrl = "http://" + iaasCompute.getIpAddress() + "/";
                 MultivaluedMap<String, String> params = new MultivaluedMapImpl();
                 params.add("path", "/" + instanceName + "/"); // Temporary. ToDo : use "/" instead of /instanceName.
-                params.add("url", proxyUrl + instanceName + "/");
+                params.add("url", proxyUrl);
 
                 Directive proxyDirective = sendRequestWithReply(
                         REST_TYPE.POST,
