@@ -1,0 +1,2 @@
+DynamicImport-Package *
+Private-Package org.ow2.jonas.jpaas.frontend.manager.bean

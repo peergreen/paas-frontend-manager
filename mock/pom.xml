@@ -20,37 +20,17 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>frontend-manager-ejb</artifactId>
-    <name>JPaaS :: Frontend Manager : EJB</name>
+    <artifactId>frontend-manager-mock</artifactId>
+    <name>JPaaS :: Frontend Manager : Mock</name>
     <packaging>bundle</packaging>
 
-    <description>jPaaS :: Frontend Manager : EJB</description>
+    <description>jPaaS :: Frontend Manager : Mock</description>
 
     <dependencies>
-        <dependency>
-            <groupId>org.ow2.spec.ee</groupId>
-            <artifactId>ow2-ejb-3.1-spec</artifactId>
-            <version>${ow2-spec.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.spec.ee</groupId>
-            <artifactId>ow2-annotation-1.1-spec</artifactId>
-            <version>${ow2-spec.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.ow2.bundles</groupId>
             <artifactId>ow2-util-log</artifactId>
             <version>${ow2-bundles.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-client</artifactId>
-            <version>${jersey.rest.client}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-core</artifactId>
-            <version>${jersey.rest.client}</version>
         </dependency>
         <dependency>
             <groupId>org.ow2.jonas.jpaas.catalog</groupId>
@@ -68,24 +48,14 @@
             <version>${jpaas.sr.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.ow2.easybeans.osgi</groupId>
-            <artifactId>easybeans-osgi-annotations</artifactId>
-            <version>${easybeans.annotations.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
-            <artifactId>vhost-manager-api</artifactId>
-            <version>${jpaas.apache.manager.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
-            <artifactId>util-api</artifactId>
-            <version>${jpaas.apache.manager.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.ow2.jonas.jpaas</groupId>
             <artifactId>frontend-manager-api</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.ipojo.annotations</artifactId>
+            <version>${ipojo.version}</version>
         </dependency>
     </dependencies>
 
@@ -96,8 +66,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
 
